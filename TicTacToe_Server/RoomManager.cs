@@ -9,20 +9,49 @@ namespace TicTacToe_Server
 	{
 		static List<Room> rooms = new List<Room>();
 
-		public static Room CreateRoom() 
+		public static Message CreateRoom() 
 		{
 			int id = rooms.Count + 1;
 			Room room = new Room(id);
 			rooms.Add(room);
-			return room;
+			return new Message() { Type = "RoomCreated", Data = room.RoomName };
 		}
-		public static Room CreateRoom(Player player)
+		public static Message CreateRoom(out Room room)
+		{
+			int id = rooms.Count + 1;
+			room = new Room(id);
+			rooms.Add(room);
+			return new Message() { Type = "RoomCreated", Data = room.RoomName };
+		}
+		public static Message CreateRoom(Player player)
 		{
 			int id = rooms.Count + 1;
 			Room room = new Room(id);
 			room.Join(player);
 			rooms.Add(room);
-			return room;
+			return new Message() { Type = "RoomCreated", Data = room.RoomName };
+
+		}
+		public static Message CreateRoom(Player player, out Room room)
+		{
+			int id = rooms.Count + 1;
+			room = new Room(id);
+			room.Join(player);
+			rooms.Add(room);
+			return new Message() { Type = "RoomCreated", Data = room.RoomName };
+
+		}
+
+		public static Message JoinRoom(Player player, Room room)
+		{
+			if (room != null)
+			{
+				return room.Join(player);
+			}
+			else
+			{
+				return new Message() { Type = "Error", Data = "Invalid Room name" };
+			}
 		}
 
 		public static Message JoinRoom(Player player, string roomName) 
@@ -42,6 +71,15 @@ namespace TicTacToe_Server
 			if (player.room != null)
 			{
 				player.room.Leave(player);
+				if (player.room.IsEmpty)
+					CloseRoom(player.room);
+			}
+		}
+		public static void LeaveRoom(Player player, Room room)
+		{
+			if (room != null)
+			{
+				room.Leave(player);
 			}
 		}
 		public static void LeaveRoom(Player player, string roomName)
@@ -53,9 +91,9 @@ namespace TicTacToe_Server
 			}
 		}
 
-		public static void CloseRoom(Room) 
+		public static void CloseRoom(Room room) 
 		{
-		
+			rooms.Remove(room);
 		}
 	}
 }

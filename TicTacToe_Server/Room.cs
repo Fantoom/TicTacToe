@@ -13,6 +13,9 @@ namespace TicTacToe_Server
 
 		public bool IsPublic { get; private set; } = true;
 
+		public bool IsEmpty { get { return Player1 == null && Player2 == null && RoomOwner == null; }  }
+		public bool IsFull  { get { return Player1 != null || Player2 != null; } }
+
 		public string RoomName { get { return "Room_" + roomId.ToString(); } } 
 		public Room(int id)
 		{
@@ -72,6 +75,7 @@ namespace TicTacToe_Server
 				else
 				{
 					RoomOwner = null;
+
 					//RoomManager.CloseRoom();
 				}
 			}

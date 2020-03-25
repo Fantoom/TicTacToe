@@ -6,7 +6,7 @@ using System.Text;
 namespace TicTacToe_Server
 {
     // State object for reading client data asynchronously  
-    public class StateObject
+    class StateObject
     {
         // Client  socket.  
         public Socket workSocket = null;
@@ -16,5 +16,9 @@ namespace TicTacToe_Server
         public byte[] buffer = new byte[BufferSize];
         // Received data string.  
         public StringBuilder sb = new StringBuilder();
+
+        public Guid guid;
+
+        public Player player;
     }
 }

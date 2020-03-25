@@ -87,14 +87,16 @@ namespace TicTacToe_Server
             // Create the state object.  
             StateObject state = new StateObject();
             state.workSocket = handler;
-
+            
             Guid guid = Guid.NewGuid();
+
+            state.guid = guid;
             Client client = new Client(guid,handler);
             clients.Add(client);
 
             Player player = new Player(client);
             players.Add(player);
-
+            state.player = player;
             handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
                 new AsyncCallback(ReadCallback), state);
         }
@@ -127,7 +129,8 @@ namespace TicTacToe_Server
                     Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
                         content.Length, content);
                     // Echo the data back to the client.  
-                    Send(handler, content);
+                    MessageProcessor.Process(content, state.player);
+                    // Send(handler, content);
                 }
                 else
                 {
