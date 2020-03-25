@@ -6,13 +6,13 @@ namespace TicTacToe_Server
 {
 	class Room
 	{
-
-		private Player player1 = null;
-		private Player player2 = null;
-		public Player Player1 { get { return player1; } }
-		public Player Player2 { get { return player2; } }
+		public Player RoomOwner { get; private set; } = null;
+		public Player Player1 { get; private set; } = null;
+		public Player Player2 { get; private set; } = null;
 		public int roomId { get; }
-		
+
+		public bool IsPublic { get; private set; } = true;
+
 		public string RoomName { get { return "Room_" + roomId.ToString(); } } 
 		public Room(int id)
 		{
@@ -21,14 +21,24 @@ namespace TicTacToe_Server
 
 		public Message Join(Player player) 
 		{
-			if (player1 == null)
+			if (Player1 == null && Player2 == null && RoomOwner == null)
 			{
-				player1 = player;
+				Player1 = player;
+				RoomOwner = player;
+				player.room = this;
+
+				return new Message() { Type = "Succsses", Data = "Joined as Player1 and Room owner" };
+			}
+			if (Player1 == null)
+			{
+				Player1 = player;
+				player.room = this;
 				return new Message() { Type = "Succsses", Data = "Joined as Player1" };
 			}
-			else if (player2 == null)
+			else if (Player2 == null)
 			{
-				player2 = player;
+				Player2 = player;
+				player.room = this;
 				return new Message() { Type = "Succsses", Data = "Joined as Player2" };
 			}
 			else 
@@ -39,13 +49,44 @@ namespace TicTacToe_Server
 
 		public void Leave(Player player)
 		{
-			if (player1.playerId == player.playerId)
+			
+			if (Player1.playerId == player.playerId)
 			{
-				player1 = null;
+				Player1 = null;
 			}
-			else if (player2.playerId == player.playerId)
+			else if (Player2.playerId == player.playerId)
 			{
-				player2 = null;
+				Player2 = null;
+			}
+			player.room = null;
+			if (RoomOwner.playerId == player.playerId)
+			{
+				if (Player1 != null)
+				{
+					RoomOwner = Player1;
+				}
+				else if (Player2 != null)
+				{
+					RoomOwner = Player2;
+				}
+				else
+				{
+					RoomOwner = null;
+					//RoomManager.CloseRoom();
+				}
+			}
+		}
+
+		public Message SwitchPublicMode(Player player)
+		{
+			if (RoomOwner.playerId == player.playerId)
+			{
+				IsPublic = !IsPublic;
+				return new Message() {Type = "PublicModeSwitch", Data = "ok" };
+			}
+			else
+			{
+				return new Message() { Type = "Error", Data = "You are not room owner" };
 			}
 		}
 

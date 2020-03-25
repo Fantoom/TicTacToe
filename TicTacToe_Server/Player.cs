@@ -9,7 +9,7 @@ namespace TicTacToe_Server
 	{
 		public Guid playerId;
 		public Client client;
-		public string roomId;
+		public Room room;
 
 		public Player(Client client)
 		{

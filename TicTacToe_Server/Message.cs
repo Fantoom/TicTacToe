@@ -8,5 +8,16 @@ namespace TicTacToe_Server
 	{
 		public string Type { get; set; }
 		public string Data { get; set; }
+
+		public Message()
+		{
+
+		}
+
+		public Message(string type, string data)
+		{
+			Type = type;
+			Data = data;
+		}
 	}
 }
