@@ -46,7 +46,7 @@ namespace TicTacToe_Server
 				
 		}
 
-		void CheckWin() 
+		private void CheckWin() 
 		{
 			foreach (PlayerType type in (PlayerType[])Enum.GetValues(typeof(PlayerType)))
 			{

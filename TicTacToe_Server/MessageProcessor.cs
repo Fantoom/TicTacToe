@@ -29,13 +29,13 @@ namespace TicTacToe_Server
 					 RoomManager.LeaveRoom(player, msg.Data);
 					break;
 				case "Move":
-					 //TODO: add logic for doing move
+					GameManager.MakeMove(player, msg.Data);
 					break;
 				default:
 					answerMessage = new Message() { Type = "Error", Data = "Unknow type" };
 					break;
 			}
-
+			SendMessageToPlayer(player, answerMessage);
 			return answerMessage;
 		}
 
@@ -51,6 +51,18 @@ namespace TicTacToe_Server
 				Console.WriteLine(e.Message);
 			}
 			return msg;
+		}
+		public static void SendMessageToPlayer(Player player, Message message) 
+		{
+			try
+			{
+				string json = JsonConvert.SerializeObject(message);
+				Server.instance.Send(player.client.socket, json);
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e.Message);
+			}
 		}
 	}
 	

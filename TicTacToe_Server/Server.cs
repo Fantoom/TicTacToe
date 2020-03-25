@@ -11,16 +11,18 @@ namespace TicTacToe_Server
 	{
         private string ip = "127.0.0.1";
         private int port = 11000;
-        public ManualResetEvent allDone = new ManualResetEvent(false);
+        private ManualResetEvent allDone = new ManualResetEvent(false);
 
-        public List<Client> clients = new List<Client>();
-        public List<Player> players = new List<Player>();
+        private List<Client> clients = new List<Client>();
+        private List<Player> players = new List<Player>();
 
+        public static Server instance { get; private set; } 
 
         public Server(string ip = "127.0.0.1" , int port = 11000)
         {
             this.ip = ip;
             this.port = port;
+            instance = this;
         }
 
         public void Start()
@@ -141,7 +143,7 @@ namespace TicTacToe_Server
             }
         }
 
-        private void Send(Socket handler, String data)
+        public void Send(Socket handler, String data)
         {
             // Convert the string data to byte data using ASCII encoding.  
             byte[] byteData = Encoding.ASCII.GetBytes(data);

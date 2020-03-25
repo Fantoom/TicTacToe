@@ -17,6 +17,9 @@ namespace TicTacToe_Server
 		public bool IsFull  { get { return Player1 != null || Player2 != null; } }
 
 		public string RoomName { get { return "Room_" + roomId.ToString(); } } 
+
+		public Game game { get; private set; }
+
 		public Room(int id)
 		{
 			roomId = roomId;
