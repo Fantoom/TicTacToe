@@ -93,12 +93,12 @@ namespace TicTacToe_Server
             Guid guid = Guid.NewGuid();
 
             state.guid = guid;
-            Client client = new Client(guid,handler);
-            clients.Add(client);
+           //  Client client = new Client(guid,handler);
+           // clients.Add(client);
 
-            Player player = new Player(client);
-            players.Add(player);
-            state.player = player;
+           // Player player = new Player(client);
+           // players.Add(player);
+           // state.player = player;
             handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
                 new AsyncCallback(ReadCallback), state);
         }

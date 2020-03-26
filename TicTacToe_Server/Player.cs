@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Net.Sockets;
-
+using NetCoreServer;
 namespace TicTacToe_Server
 {
 	class Player
 	{
 		public Guid playerId;
-		public Client client;
+		public TcpSession session;
 		public Room room;
 
-		public Player(Client client)
+		public Player(TcpSession session)
 		{
-			this.playerId = client.id;
-			this.client = client;
+			this.playerId = session.Id;
+			this.session = session;
 		}
 	}
 }

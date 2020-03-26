@@ -4,34 +4,48 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using NetCoreServer;
+using System.Linq;
+
 namespace TicTacToe_Server
 {
 	class TestServer : TcpServer
     {
-        private string ip = "127.0.0.1";
-        private int port = 11000;
 
 
-        private List<Client> clients = new List<Client>();
         private List<Player> players = new List<Player>();
 
         public static Server instance { get; private set; }
 
-
         public TestServer(IPAddress address, int port) : base(address, port) { }
 
-        protected override TcpSession CreateSession() { return new ChatSession(this); }
+        protected override TcpSession CreateSession() { return new PlayerSession(this); }
+
+        protected override void OnConnected(TcpSession session)
+        {
+            Player player = new Player(session);
+            players.Add(player);
+            ((PlayerSession)session).Player = player;
+        }
+
+        protected override void OnDisconnected(TcpSession session)
+        {
+            // base.OnDisconnected(session);
+            players.RemoveAll(x => x.playerId == session.Id);
+        }
 
         protected override void OnError(SocketError error)
         {
             Console.WriteLine($"Chat TCP server caught an error with code {error}");
         }
+
     }
 
-    class ChatSession : TcpSession
+    class PlayerSession : TcpSession
     {
+        
+        public Player Player { get; set; }
 
-        public ChatSession(TcpServer server) : base(server) { }
+        public PlayerSession(TcpServer server) : base(server) { }
         
         protected override void OnConnected()
         {
@@ -52,8 +66,7 @@ namespace TicTacToe_Server
             string message = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
             Console.WriteLine("Incoming: " + message);
 
-            // Multicast message to all connected sessions
-            Server.Multicast(message);
+            MessageProcessor.Process(message, Player);
 
             // If the buffer starts with '!' the disconnect the current session
             if (message == "!")

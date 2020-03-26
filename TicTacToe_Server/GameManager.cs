@@ -7,22 +7,25 @@ namespace TicTacToe_Server
 {
 	static class GameManager
 	{
-		public static void MakeMove(Player player, string move)
+		public static Message MakeMove(Player player, string move)
 		{
-			Coords coords = JsonConvert.DeserializeObject<Coords>(move);
-			player.room.game.Move(player, coords.x, coords.y);
+			try
+			{
+				return player.room.game.Move(player, int.Parse(move.Split(',')[0]), int.Parse(move.Split(',')[1]));
+			
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e.Message);
+
+				return new Message() { Type = "Error", Data = e.Message };
+			}
+		
 		}
 		public static void SendMoveToPlayer(Player player, int x, int y)
 		{
-			Coords coords = new Coords() { x = x, y = y };
-			string coordsJson = JsonConvert.SerializeObject(coords);
-			Message message = new Message() { Type = "Move" , Data = coordsJson };
+			Message message = new Message() { Type = "Move" , Data = $"{x},{y}"};
 		}
 	}
 
-	public class Coords 
-	{
-		public int x;
-		public int y;
-	}
 }
