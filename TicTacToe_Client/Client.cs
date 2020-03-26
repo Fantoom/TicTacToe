@@ -59,11 +59,11 @@ namespace TicTacToe_Client
                 //sendDone.WaitOne();
 
                 // Receive the response from the remote device.  
-               /* Receive(client);
+                Receive(client);
                 receiveDone.WaitOne();
 
                 // Write the response to the console.  
-                Console.WriteLine("Response received : {0}", response);*/
+                Console.WriteLine("Response received : {0}", response);
 
                 // Release the socket.  
                // client.Shutdown(SocketShutdown.Both);

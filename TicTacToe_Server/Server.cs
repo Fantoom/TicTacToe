@@ -112,6 +112,10 @@ namespace TicTacToe_Server
             StateObject state = (StateObject)ar.AsyncState;
             Socket handler = state.workSocket;
 
+            try
+            {
+
+           
             // Read data from the client socket.
             int bytesRead = handler.EndReceive(ar);
 
@@ -140,6 +144,11 @@ namespace TicTacToe_Server
                     handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
                     new AsyncCallback(ReadCallback), state);
                 }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
             }
         }
 
