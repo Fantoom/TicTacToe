@@ -8,24 +8,24 @@ namespace TicTacToe_Server
 	static class RoomManager
 	{
 		static List<Room> rooms = new List<Room>();
-
+		static int lastRoomId = 0;
 		public static Message CreateRoom() 
 		{
-			int id = rooms.Count + 1;
+			int id = ++lastRoomId; // Can be replaced with id generation algorithm
 			Room room = new Room(id);
 			rooms.Add(room);
 			return new Message() { Type = "RoomCreated", Data = room.RoomName };
 		}
 		public static Message CreateRoom(out Room room)
 		{
-			int id = rooms.Count + 1;
+			int id = ++lastRoomId;
 			room = new Room(id);
 			rooms.Add(room);
 			return new Message() { Type = "RoomCreated", Data = room.RoomName };
 		}
 		public static Message CreateRoom(Player player)
 		{
-			int id = rooms.Count + 1;
+			int id = ++lastRoomId;
 			Room room = new Room(id);
 			room.Join(player);
 			rooms.Add(room);
@@ -34,7 +34,7 @@ namespace TicTacToe_Server
 		}
 		public static Message CreateRoom(Player player, out Room room)
 		{
-			int id = rooms.Count + 1;
+			int id = ++lastRoomId;
 			room = new Room(id);
 			room.Join(player);
 			rooms.Add(room);

@@ -33,19 +33,19 @@ namespace TicTacToe_Server
 				RoomOwner = player;
 				player.room = this;
 
-				return new Message() { Type = "Succsses", Data = "Joined as Player1 and Room owner" };
+				return new Message() { Type = "Joined", Data = "JoinedAsOwner" };
 			}
 			if (Player1 == null)
 			{
 				Player1 = player;
 				player.room = this;
-				return new Message() { Type = "Succsses", Data = "Joined as Player1" };
+				return new Message() { Type = "Joined", Data = "JoinedAsP1" };
 			}
 			else if (Player2 == null)
 			{
 				Player2 = player;
 				player.room = this;
-				return new Message() { Type = "Succsses", Data = "Joined as Player2" };
+				return new Message() { Type = "Joined", Data = "JoinedAsP2" };
 			}
 			else 
 			{

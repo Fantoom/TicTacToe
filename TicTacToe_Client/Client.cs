@@ -3,12 +3,20 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using Newtonsoft.Json;
 using TcpClient = NetCoreServer.TcpClient;
 
 namespace TicTacToe_Client
 {
-    class Client : TcpClient
+    public class Client : TcpClient
     {
+        public delegate void OnDataRecived(string data);
+        public delegate void OnMessageRecived(Message data);
+
+
+        public event OnDataRecived onDataRecived;
+        public event OnMessageRecived onMessageRecived;
+
         public Client(string address, int port) : base(address, port) { }
 
         public void DisconnectAndStop()
@@ -38,7 +46,19 @@ namespace TicTacToe_Client
 
         protected override void OnReceived(byte[] buffer, long offset, long size)
         {
-            Console.WriteLine(Encoding.UTF8.GetString(buffer, (int)offset, (int)size));
+            string data = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
+            onDataRecived(data);
+            try
+            {
+                Message message = JsonConvert.DeserializeObject<Message>(data);
+                onMessageRecived(message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            
+            Console.WriteLine(data);
         }
 
         protected override void OnError(SocketError error)
