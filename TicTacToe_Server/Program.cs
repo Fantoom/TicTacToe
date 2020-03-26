@@ -10,8 +10,8 @@ namespace TicTacToe_Server
 
 		static void Main(string[] args)
 		{
-			 TestServer server = new TestServer(System.Net.IPAddress.Parse(ip), port);
-			 server.Start();
+			Server server = new Server(System.Net.IPAddress.Parse(ip), port);
+			server.Start();
 
             // Start the server
             Console.Write("Server starting...");

@@ -3,184 +3,79 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
+using NetCoreServer;
+using System.Linq;
 
 namespace TicTacToe_Server
 {
-	class Server
-	{
-        private string ip = "127.0.0.1";
-        private int port = 11000;
-        private ManualResetEvent allDone = new ManualResetEvent(false);
+	class Server : TcpServer
+    {
 
-        private List<Client> clients = new List<Client>();
+
         private List<Player> players = new List<Player>();
 
-        public static Server instance { get; private set; } 
+        public static Server instance { get; private set; }
 
-        public Server(string ip = "127.0.0.1" , int port = 11000)
+        public Server(IPAddress address, int port) : base(address, port) { }
+
+        protected override TcpSession CreateSession() { return new PlayerSession(this); }
+
+        protected override void OnConnected(TcpSession session)
         {
-            this.ip = ip;
-            this.port = port;
-            instance = this;
+            Player player = new Player(session);
+            players.Add(player);
+            ((PlayerSession)session).Player = player;
         }
 
-        public void Start()
+        protected override void OnDisconnected(TcpSession session)
         {
-            StartListening();
-
+            // base.OnDisconnected(session);
+            players.RemoveAll(x => x.playerId == session.Id);
         }
 
-
-        public void StartListening()
+        protected override void OnError(SocketError error)
         {
-            // Establish the local endpoint for the socket.  
-            // The DNS name of the computer  
-            // running the listener is "host.contoso.com".  
-            IPHostEntry ipHostInfo = Dns.GetHostEntry(ip);
-            IPAddress ipAddress = ipHostInfo.AddressList[0];
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, port);
-
-            // Create a TCP/IP socket.  
-            Socket listener = new Socket(ipAddress.AddressFamily,
-                SocketType.Stream, ProtocolType.Tcp);
-
-            // Bind the socket to the local endpoint and listen for incoming connections.  
-            try
-            {
-                listener.Bind(localEndPoint);
-                listener.Listen(100);
-
-                while (true)
-                {
-                    // Set the event to nonsignaled state.  
-                    allDone.Reset();
-
-                    // Start an asynchronous socket to listen for connections.  
-                    Console.WriteLine("Waiting for a connection...");
-                    listener.BeginAccept(
-                        new AsyncCallback(AcceptCallback),
-                        listener);
-
-                    // Wait until a connection is made before continuing.  
-                    allDone.WaitOne();
-                }
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-
-            Console.WriteLine("\nPress ENTER to continue...");
-            Console.Read();
-
+            Console.WriteLine($"Chat TCP server caught an error with code {error}");
         }
 
-        public void AcceptCallback(IAsyncResult ar)
+    }
+
+    class PlayerSession : TcpSession
+    {
+        
+        public Player Player { get; set; }
+
+        public PlayerSession(TcpServer server) : base(server) { }
+        
+        protected override void OnConnected()
         {
-            // Signal the main thread to continue.  
-            allDone.Set();
+            Console.WriteLine($"Chat TCP session with Id {Id} connected!");
 
-            // Get the socket that handles the client request.  
-            Socket listener = (Socket)ar.AsyncState;
-            Socket handler = listener.EndAccept(ar);
-
-            // Create the state object.  
-            StateObject state = new StateObject();
-            state.workSocket = handler;
-            
-            Guid guid = Guid.NewGuid();
-
-            state.guid = guid;
-           //  Client client = new Client(guid,handler);
-           // clients.Add(client);
-
-           // Player player = new Player(client);
-           // players.Add(player);
-           // state.player = player;
-            handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                new AsyncCallback(ReadCallback), state);
+            // Send invite message
+           // string message = "Hello from TCP chat! Please send a message or '!' to disconnect the client!";
+           // SendAsync(message);
         }
 
-        public void ReadCallback(IAsyncResult ar)
+        protected override void OnDisconnected()
         {
-            String content = String.Empty;
-
-            // Retrieve the state object and the handler socket  
-            // from the asynchronous state object.  
-            StateObject state = (StateObject)ar.AsyncState;
-            Socket handler = state.workSocket;
-
-            try
-            {
-
-           
-            // Read data from the client socket.
-            int bytesRead = handler.EndReceive(ar);
-
-            if (bytesRead > 0)
-            {
-                // There  might be more data, so store the data received so far.  
-                state.sb.Append(Encoding.ASCII.GetString(
-                    state.buffer, 0, bytesRead));
-
-                // Check for end-of-file tag. If it is not there, read
-                // more data.  
-                content = state.sb.ToString();
-                if (content.IndexOf("<EOF>") > -1)
-                {
-                    // All the data has been read from the
-                    // client. Display it on the console.  
-                    Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
-                        content.Length, content);
-                    // Echo the data back to the client.  
-                    MessageProcessor.Process(content, state.player);
-                    // Send(handler, content);
-                }
-                else
-                {
-                    // Not all data received. Get more.  
-                    handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                    new AsyncCallback(ReadCallback), state);
-                }
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
+            Console.WriteLine($"Chat TCP session with Id {Id} disconnected!");
         }
 
-        public void Send(Socket handler, String data)
+        protected override void OnReceived(byte[] buffer, long offset, long size)
         {
-            // Convert the string data to byte data using ASCII encoding.  
-            byte[] byteData = Encoding.ASCII.GetBytes(data);
+            string message = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
+            Console.WriteLine("Incoming: " + message);
 
-            // Begin sending the data to the remote device.  
-            handler.BeginSend(byteData, 0, byteData.Length, 0,
-                new AsyncCallback(SendCallback), handler);
+            MessageProcessor.Process(message, Player);
+
+            // If the buffer starts with '!' the disconnect the current session
+            if (message == "!")
+                Disconnect();
         }
 
-        private void SendCallback(IAsyncResult ar)
+        protected override void OnError(SocketError error)
         {
-            try
-            {
-                // Retrieve the socket from the state object.  
-                Socket handler = (Socket)ar.AsyncState;
-
-                // Complete sending the data to the remote device.  
-                int bytesSent = handler.EndSend(ar);
-                Console.WriteLine("Sent {0} bytes to client.", bytesSent);
-
-                handler.Shutdown(SocketShutdown.Both);
-                handler.Close();
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
+            Console.WriteLine($"Chat TCP session caught an error with code {error}");
         }
     }
 
