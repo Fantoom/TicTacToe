@@ -7,7 +7,7 @@ namespace TicTacToe_Client
 	class Program
 	{
 		static private string ip = "127.0.0.1";
-		static private int port = 11000;
+		static private int port = 11001;
 		static void Main(string[] args)
 		{
 			Client client = new Client(ip,port);
@@ -18,7 +18,7 @@ namespace TicTacToe_Client
 
 			Console.WriteLine();
 
-			// Create a new TCP chat client
+			// Create a new TCP Game client
 
 			// Connect the client
 			Console.Write("Client connecting...");
@@ -43,7 +43,7 @@ namespace TicTacToe_Client
 					continue;
 				}
 
-				// Send the entered text to the chat server
+				// Send the entered text to the Game server
 				client.SendAsync(line);
 			}
 		}

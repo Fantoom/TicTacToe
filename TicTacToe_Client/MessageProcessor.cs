@@ -7,6 +7,12 @@ namespace TicTacToe_Client
 {
 	static class MessageProcessor
 	{
+		public delegate void OnMessageProcessed(string data);
+		public static event OnMessageProcessed OnRoomCreated;
+		public static event OnMessageProcessed OnJoined;
+		public static event OnMessageProcessed OnMoved;
+
+
 		public static void CreateRoom(Client client) 
 		{
 			string json = JsonConvert.SerializeObject(new Message() {Type = "CreateRoom", Data = "" });
@@ -29,20 +35,22 @@ namespace TicTacToe_Client
 
 			Message answerMessage = new Message();
 
-			switch (msg.Type)
+			switch (msg.Type.ToLower())
 			{
-				case "RoomCreated":
-					// TODO: add Game Window
+				case "roomcreated":
+					OnRoomCreated(msg.Data);
 					break;
-				case "JoinRoom":
-					// TODO: add Game Window
+				case "joined":
+					OnJoined(msg.Data);
 					break;
-				case "Joined":
-					// TODO: add Game Window
+				case "moved":
+					OnMoved(msg.Data);
 					break;
-			
+				case "error":
+
+					break;
 				default:
-					answerMessage = new Message() { Type = "Error", Data = "Unknow type" };
+					
 					break;
 			}
 

@@ -14,8 +14,8 @@ namespace TicTacToe_Client
         public delegate void OnMessageRecived(Message data);
 
 
-        public event OnDataRecived onDataRecived;
-        public event OnMessageRecived onMessageRecived;
+        public event OnDataRecived onDataRecived = delegate { };
+        public event OnMessageRecived onMessageRecived = delegate { };
 
         public Client(string address, int port) : base(address, port) { }
 
@@ -29,12 +29,12 @@ namespace TicTacToe_Client
 
         protected override void OnConnected()
         {
-            Console.WriteLine($"Chat TCP client connected a new session with Id {Id}");
+            Console.WriteLine($"Game TCP client connected a new session with Id {Id}");
         }
 
         protected override void OnDisconnected()
         {
-            Console.WriteLine($"Chat TCP client disconnected a session with Id {Id}");
+            Console.WriteLine($"Game TCP client disconnected a session with Id {Id}");
 
             // Wait for a while...
             Thread.Sleep(1000);
@@ -47,7 +47,7 @@ namespace TicTacToe_Client
         protected override void OnReceived(byte[] buffer, long offset, long size)
         {
             string data = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
-            onDataRecived(data);
+            onDataRecived?.Invoke(data);
             try
             {
                 Message message = JsonConvert.DeserializeObject<Message>(data);
@@ -63,7 +63,7 @@ namespace TicTacToe_Client
 
         protected override void OnError(SocketError error)
         {
-            Console.WriteLine($"Chat TCP client caught an error with code {error}");
+            Console.WriteLine($"Game TCP client caught an error with code {error}");
         }
 
         private bool _stop;

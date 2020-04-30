@@ -17,19 +17,19 @@ namespace TicTacToe_Server
 
 			Message answerMessage = new Message();
 
-			switch (msg.Type)
+			switch (msg.Type.ToLower())
 			{
-				case "CreateRoom":
+				case "createroom":
 					 answerMessage = RoomManager.CreateRoom(player);
 					break;
-				case "JoinRoom":
+				case "joinroom":
 					 answerMessage = RoomManager.JoinRoom(player,msg.Data);
 					break;
-				case "LeaveRoom":
+				case "leaveroom":
 					 RoomManager.LeaveRoom(player, msg.Data);
 					break;
-				case "Move":
-					 GameManager.MakeMove(player, msg.Data);
+				case "move":
+					answerMessage = GameManager.MakeMove(player, msg.Data);
 
 					break;
 				default:

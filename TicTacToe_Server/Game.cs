@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,8 +30,8 @@ namespace TicTacToe_Server
 
 			InGameP1.type = (PlayerType)typeof(PlayerType).GetRandomEnumValue();
 			InGameP2.type = (PlayerType)(1 - (int)InGameP1.type);
-			MessageProcessor.SendMessageToPlayer(InGameP1.player, new Message() { Type = "PlayerType", Data = InGameP1.type.ToString() });
-			MessageProcessor.SendMessageToPlayer(InGameP2.player, new Message() { Type = "PlayerType", Data = InGameP2.type.ToString() });
+			MessageProcessor.SendMessageToPlayer(InGameP1.player, new Message() { Type = "GameStart", Data = $"Type:{InGameP1.type.ToString()}" });
+			MessageProcessor.SendMessageToPlayer(InGameP2.player, new Message() { Type = "GameStart", Data = $"Type:{InGameP2.type.ToString()}" });
 
 
 			InGamePlayerList.Add(InGameP1.type, InGameP1);
@@ -39,8 +40,8 @@ namespace TicTacToe_Server
 			currentPlayer = InGamePlayerList[(PlayerType)typeof(PlayerType).GetRandomEnumValue()];
 			nextPlayer = InGamePlayerList.Values.Where(x => x.player.playerId != currentPlayer.player.playerId).FirstOrDefault();
 
-			MessageProcessor.SendMessageToPlayer(currentPlayer.player, new Message() { Type = "Turn", Data = "Your" });
-			MessageProcessor.SendMessageToPlayer(nextPlayer.player, new Message() { Type = "Turn", Data = "Opponent" });
+			MessageProcessor.SendMessageToPlayer(currentPlayer.player, new Message() { Type = "Turn", Data = "true" });
+			MessageProcessor.SendMessageToPlayer(nextPlayer.player, new Message() { Type = "Turn", Data = "false" });
 
 			//TODO Send message to players that game started and his type
 		}
@@ -50,13 +51,17 @@ namespace TicTacToe_Server
 			Message answer = new Message() { Type = "Error", Data = "Unknow error" };
 			if (player.playerId == currentPlayer.player.playerId)
 			{
-				var inGamePlayer = InGamePlayerList.Values.Where(x => x.player.playerId == player.playerId).FirstOrDefault();
 				if (desk[y, x] == DeskCell.empty)
 				{
-					desk[y, x] = (DeskCell)Enum.Parse(typeof(DeskCell), inGamePlayer.type.ToString());
-					MessageProcessor.SendMessageToPlayer(nextPlayer.player, new Message() { Type = "Move", Data = $"{x},{y}" });
+					desk[y, x] = (DeskCell)Enum.Parse(typeof(DeskCell), currentPlayer.type.ToString());
+					string deskString = JsonConvert.SerializeObject(desk); //DeskToString(desk);
+					MessageProcessor.SendMessageToPlayer(nextPlayer.player, new Message() { Type = "Desk", Data = deskString });
+					MessageProcessor.SendMessageToPlayer(currentPlayer.player, new Message() { Type = "Desk", Data = deskString });
+
+
+					answer = new Message() { Type = "Moved", Data = $"{x},{y}" };
 					CheckWin();
-					answer = new Message() { Type = "Succses", Data = $"You moved to {x},{y}" };
+
 				}
 			}
 			else 
@@ -104,6 +109,18 @@ namespace TicTacToe_Server
 				}
 			}
 		}
+		private string DeskToString(DeskCell[,] desk)
+		{
+			string readyString = "";
+			for (int y = 0; y < 3; y++)
+			{
+				for (int x = 0; x < 3; x++)
+				{
+					readyString += $"{x},{y}:{desk[y,x]}|";
+				}
+			}
+			return readyString;
+		}
 
 		private void SwitchPlayer()
 		{
@@ -111,8 +128,8 @@ namespace TicTacToe_Server
 			currentPlayer = nextPlayer;
 			nextPlayer = currentPlayer;
 
-			MessageProcessor.SendMessageToPlayer(currentPlayer.player, new Message() { Type = "Turn", Data = "Your" });
-			MessageProcessor.SendMessageToPlayer(nextPlayer.player, new Message() { Type = "Turn", Data = "Opponent" });
+			MessageProcessor.SendMessageToPlayer(currentPlayer.player, new Message() { Type = "Turn", Data = "True" });
+			MessageProcessor.SendMessageToPlayer(nextPlayer.player, new Message() { Type = "Turn", Data = "False" });
 
 		}
 
@@ -125,8 +142,8 @@ namespace TicTacToe_Server
 		enum DeskCell 
 		{
 			empty = 0,
-			X,
-			O
+			X = 1,
+			O = 2
 		}
 		enum PlayerType
 		{

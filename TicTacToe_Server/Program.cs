@@ -6,7 +6,7 @@ namespace TicTacToe_Server
 	class Program
 	{
 		static string ip = "127.0.0.1";
-		static int port = 11000;
+		static int port = 11001;
 
 		static void Main(string[] args)
 		{

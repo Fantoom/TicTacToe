@@ -11,7 +11,6 @@ namespace TicTacToe_Server
 	class Server : TcpServer
     {
 
-
         private List<Player> players = new List<Player>();
 
         public static Server instance { get; private set; }
@@ -35,9 +34,8 @@ namespace TicTacToe_Server
 
         protected override void OnError(SocketError error)
         {
-            Console.WriteLine($"Chat TCP server caught an error with code {error}");
+            Console.WriteLine($"Game TCP server caught an error with code {error}");
         }
-
     }
 
     class PlayerSession : TcpSession
@@ -49,16 +47,16 @@ namespace TicTacToe_Server
         
         protected override void OnConnected()
         {
-            Console.WriteLine($"Chat TCP session with Id {Id} connected!");
+            Console.WriteLine($"Game TCP session with Id {Id} connected!");
 
-            // Send invite message
-           // string message = "Hello from TCP chat! Please send a message or '!' to disconnect the client!";
+           // Send invite message
+           // string message = "Hello from TCP Game! Please send a message or '!' to disconnect the client!";
            // SendAsync(message);
         }
 
         protected override void OnDisconnected()
         {
-            Console.WriteLine($"Chat TCP session with Id {Id} disconnected!");
+            Console.WriteLine($"Game TCP session with Id {Id} disconnected!");
         }
 
         protected override void OnReceived(byte[] buffer, long offset, long size)
@@ -75,7 +73,7 @@ namespace TicTacToe_Server
 
         protected override void OnError(SocketError error)
         {
-            Console.WriteLine($"Chat TCP session caught an error with code {error}");
+            Console.WriteLine($"Game TCP session caught an error with code {error}");
         }
     }
 
