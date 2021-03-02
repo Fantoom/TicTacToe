@@ -7,14 +7,14 @@ namespace TicTacToe_Server
 {
 	class Player
 	{
-		public Guid playerId;
-		public TcpSession session;
-		public Room room;
+		public Guid PlayerId { get; private set; }
+		public TcpSession Session { get; private set; }
+		public Room Room { get; set; }
 
 		public Player(TcpSession session)
 		{
-			this.playerId = session.Id;
-			this.session = session;
+			PlayerId = session.Id;
+			Session = session;
 		}
 	}
 }

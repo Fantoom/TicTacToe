@@ -15,12 +15,12 @@ namespace TicTacToe_Client
 
 		public static void CreateRoom(Client client) 
 		{
-			string json = JsonConvert.SerializeObject(new Message() {Type = "CreateRoom", Data = "" });
+			string json = JsonConvert.SerializeObject(new Message() {Type = MessageType.CreateRoom.ToString(), Data = "" });
 			client.SendAsync(json);
 		}
 		public static void JoinRoom(Client client, string RoomID)
 		{
-			string json = JsonConvert.SerializeObject(new Message() { Type = "JoinRoom", Data = RoomID });
+			string json = JsonConvert.SerializeObject(new Message() { Type = MessageType.JoinRoom.ToString(), Data = RoomID });
 			client.SendAsync(json);
 		}
 
@@ -35,22 +35,20 @@ namespace TicTacToe_Client
 
 			Message answerMessage = new Message();
 
-			switch (msg.Type.ToLower())
+			switch (Enum.Parse<MessageType>(msg.Type.ToLower(), true))
 			{
-				case "roomcreated":
+				case MessageType.CreateRoom:
 					OnRoomCreated(msg.Data);
 					break;
-				case "joined":
+				case MessageType.Joined:
 					OnJoined(msg.Data);
 					break;
-				case "moved":
+				case MessageType.Moved:
 					OnMoved(msg.Data);
 					break;
-				case "error":
-
+				case MessageType.Error:
 					break;
 				default:
-					
 					break;
 			}
 
@@ -67,6 +65,23 @@ namespace TicTacToe_Client
 				Console.WriteLine(e.Message);
 			}
 			return msg;
+		}
+
+		public enum MessageType
+		{
+			CreateRoom,
+			JoinRoom,
+			LeaveRoom,
+			Move,
+			RoomCreated,
+			Error,
+			Moved,
+			PublicModeSwitch,
+			Joined,
+			Turn,
+			Desk,
+			Win,
+			GameStart
 		}
 	}
 }

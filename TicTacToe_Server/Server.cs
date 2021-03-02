@@ -29,7 +29,7 @@ namespace TicTacToe_Server
         protected override void OnDisconnected(TcpSession session)
         {
             // base.OnDisconnected(session);
-            players.RemoveAll(x => x.playerId == session.Id);
+            players.RemoveAll(x => x.PlayerId == session.Id);
         }
 
         protected override void OnError(SocketError error)

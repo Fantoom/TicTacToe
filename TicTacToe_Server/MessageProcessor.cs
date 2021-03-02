@@ -12,28 +12,27 @@ namespace TicTacToe_Server
 
 			if (msg == null)
 			{ 
-				return new Message() { Type = "Error", Data = "Invalid Json or Server-side error" };
+				return new Message() { Type = MessageType.Error.ToString(), Data = "Invalid Json or Server-side error" };
 			}
 
 			Message answerMessage = new Message();
 
-			switch (msg.Type.ToLower())
+			switch (Enum.Parse<MessageType>(msg.Type.ToLower(), true))
 			{
-				case "createroom":
+				case MessageType.CreateRoom:
 					 answerMessage = RoomManager.CreateRoom(player);
 					break;
-				case "joinroom":
+				case MessageType.JoinRoom:
 					 answerMessage = RoomManager.JoinRoom(player,msg.Data);
 					break;
-				case "leaveroom":
+				case MessageType.LeaveRoom:
 					 RoomManager.LeaveRoom(player, msg.Data);
 					break;
-				case "move":
+				case MessageType.Move:
 					answerMessage = GameManager.MakeMove(player, msg.Data);
-
 					break;
 				default:
-					answerMessage = new Message() { Type = "Error", Data = "Unknow type" };
+					answerMessage = new Message() { Type = MessageType.Error.ToString(), Data = "Unknow type" };
 					break;
 			}
 			SendMessageToPlayer(player, answerMessage);
@@ -59,7 +58,7 @@ namespace TicTacToe_Server
 			{
 				string json = JsonConvert.SerializeObject(message);
 				//Server.instance.Send(player.client.socket, json);
-				player.session.SendAsync(json);
+				player.Session.SendAsync(json);
 			}
 			catch (Exception e)
 			{
@@ -67,5 +66,20 @@ namespace TicTacToe_Server
 			}
 		}
 	}
-	
+	public enum MessageType 
+	{
+		CreateRoom,
+		JoinRoom,
+		LeaveRoom,
+		Move,
+		RoomCreated,
+		Error,
+		Moved,
+		PublicModeSwitch,
+		Joined,
+		Turn,
+		Desk,
+		Win,
+		GameStart
+	}
 }

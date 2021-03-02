@@ -11,21 +11,19 @@ namespace TicTacToe_Server
 		{
 			try
 			{
-				return player.room.game.Move(player, int.Parse(move.Split(',')[0]), int.Parse(move.Split(',')[1]));
-			
+				return player.Room.Game.Move(player, int.Parse(move.Split(',')[0]), int.Parse(move.Split(',')[1]));
 			}
 			catch (Exception e)
 			{
 				Console.WriteLine(e.Message);
 
-				return new Message() { Type = "Error", Data = e.Message };
+				return new Message() { Type = MessageType.Error.ToString(), Data = e.Message };
 			}
 		
 		}
 		public static void SendMoveToPlayer(Player player, int x, int y)
 		{
-			Message message = new Message() { Type = "Move" , Data = $"{x},{y}"};
+			Message message = new Message() { Type = MessageType.Move.ToString(), Data = $"{x},{y}"};
 		}
 	}
-
 }
